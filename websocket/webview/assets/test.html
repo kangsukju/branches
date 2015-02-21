@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+function send_message()
+{
+	v = document.getElementById("txt1").value;
+	alert(window.android);
+	alert(window.android.setMessage);
+	window.android.setMessage(v);
+}
+</script>
+</head>
+
+<body>
+<div>
+	<li>aaaa</li>
+	<li><input type="text" width=100 id="txt1" /></li>
+	<li><input type="button" value="go" onClick="javascript:send_message()"/></li>
+</div>
+</body>
+</html>

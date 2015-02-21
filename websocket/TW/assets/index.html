@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="Stylesheet" href="farbtastic.css" />
+    <link rel="Stylesheet" href="css/ui-lightness/jquery-ui-1.8.16.custom.css" />
+    <script src="jquery-1.7.1.js"></script>
+    <script src="js/jquery-ui-1.8.16.custom.min.js "></script>
+    <script src="farbtastic.js"></script>
+    
+	<script type="text/javascript">
+	
+	$(document).ready(function () {
+		var ws_room = null;
+		var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+		// 변수를 선언합니다.
+        var width = 5;
+        var color = '#000000';
+        var lastPoint = null;
+        
+        /*
+        canvas.addEventListener("touchstart", function(e) {
+        	e.preventDefault();
+        }, false);
+        */
+        
+        canvas.addEventListener("touchmove", function(e) {
+        	e.preventDefault();
+        	if (lastPoint != null) {
+        		
+        		/*
+        		// self draw
+        		context.strokeStyle = color;
+        		context.beginPath();
+        		context.moveTo(lastPoint.x, lastPoint.y);
+        		context.lineTo(e.touches[0].pageX, e.touches[0].pageY);
+        		context.stroke();
+        		*/
+        		
+        		if (ws_room != null) {
+        			var msg = {
+           				width: width,
+           				color: color,
+           				x1: lastPoint.x,
+           				y1: lastPoint.y,
+           				x2: e.touches[0].pageX,
+           				y2: e.touches[0].pageY        					
+        			};
+        			ws_room.send(JSON.stringify(msg));
+        		}
+        	}
+        	lastPoint = {x:e.touches[0].pageX, y:e.touches[0].pageY};
+        }, false);
+
+        canvas.addEventListener("touchend", function(e) {
+        	e.preventDefault();
+        	lastPoint = null;
+        }, false);
+        
+        if ("WebSocket" in window) {
+        	var uri = window.tw_native.getServerHost();
+        	ws_room = new WebSocket(uri+"/room"/*, ['soap', 'xmpp']*/);
+        	alert(uri+"/room");
+        	
+        	ws_room.onopen = function() {
+//        		alert("onopen");
+        	}
+        	ws_room.onmessage = function(e) {
+        		var d = JSON.parse(e.data);
+        		context.lineWidth = d.width;
+        		context.strokeStyle = d.color;
+        		context.beginPath();
+        		context.moveTo(d.x1, d.y1);
+        		context.lineTo(d.x2, d.y2);
+        		context.stroke();
+        	}
+        	ws_room.onclose = function(e) {
+//        		alert("onclose");
+        	}
+        }
+        
+        window.onbeforeunload = function() { 
+        	ws_room.close();
+        }
+        
+		// UI를 구성합니다.
+        $('#colorpicker').farbtastic(function (data) {
+        	color = data;
+		});
+        $('#slider').slider({
+        	max: 20, min: 1,
+			value: 5,
+			change: function (event, ui) {
+				width = ui.value;
+			}
+		});
+	});
+
+	
+
+	function send_message() {
+	/*
+		v = document.getElementById("txt1").value;
+		alert(window.android);
+		alert(window.android.setMessage);
+		window.android.setMessage(v);
+	*/	
+	}
+	</script>
+</head>
+
+<body>
+<div>
+	<h1>Welcome</h1>
+</div>
+<div>
+	<!--
+	<li><input type="text" width=100 id="txt1" /></li>
+	<li><input type="button" value="go" onClick="javascript:send_message()"/></li>
+	-->
+	<table border="1">
+        <tr>
+            <td rowspan="3">
+                <!-- CANVAS -->
+                <canvas id="canvas" width="300" height="400"></canvas>
+            </td>
+            <td height="200">
+                <!-- COLOR PICKER -->
+                <div id="colorpicker"></div>
+            </td>
+        </tr>
+        <tr>
+            <td height="25">
+                <!-- SLIDER -->
+                <div id="slider"></div>
+            </td>
+        </tr>
+        <tr>
+            <td style="background:Orange;"></td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
